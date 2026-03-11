@@ -11,7 +11,9 @@
 | Archivo            | Propósito principal                                      |
 |--------------------|----------------------------------------------------------|
 | `.env.example`     | Documenta todas las variables de entorno requeridas      |
-| `Makefile`         | Golden path de setup en un solo `make setup`             |
+| `Dockerfile`       | Fija Python 3.11 e instala dependencias del sistema      |
+| `docker-compose.yml` | Levanta app + PostgreSQL con un solo comando           |
+| `Makefile`         | Golden path de setup en un solo `make setup`             |           |
 
 ---
 
@@ -86,48 +88,6 @@ docker compose logs -f web
 docker compose logs -f db
 ```
 
----
-
-###  Sin Docker (instalación local)
-
-**Requisitos previos del sistema:**
-
-- Python 3.11 ([descargar](https://www.python.org/downloads/))
-- PostgreSQL 15 ([descargar](https://www.postgresql.org/download/))
-  - En Ubuntu/Debian: `sudo apt-get install postgresql libpq-dev python3-dev gcc`
-  - En macOS: `brew install postgresql@15`
-
-```bash
-# 1. Clona el repositorio
-git clone https://github.com/Pablokill2004/simple_erp-fork-room6.git
-cd simple_erp-fork-room6
-
-# 2. Crea la base de datos en PostgreSQL
-# Primero entra al cliente de postgres:
-psql -U postgres
-# Dentro de psql, ejecuta:
-# CREATE DATABASE tienda;
-# \q
-
-# 3. Copia y edita el archivo de variables de entorno
-cp .env.example .env
-# Edita .env: pon tu DB_PASSWORD real y una SECRET_KEY segura
-# En local, DB_HOST debe ser 127.0.0.1
-
-# 4. Corre el setup completo con make (crea venv, instala deps, migra)
-make setup
-# Si no tienes make instalado:
-#   Windows: instala con  choco install make
-#   macOS:   viene incluido con Xcode Command Line Tools
-
-# 5. Crea el superusuario de Django
-source venv/bin/activate
-python manage.py createsuperuser
-
-# 6. Arranca el servidor
-make run
-# → http://127.0.0.1:8000
-```
 
 ---
 
