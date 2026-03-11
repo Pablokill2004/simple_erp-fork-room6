@@ -78,11 +78,11 @@ WSGI_APPLICATION = 'gestor.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':"django.db.backends.postgresql",
-        "NAME":"tienda",
-        "USER":"postgres",
-        "PASSWORD":"my_pass",
-        "HOST":"127.0.0.1",
-        "PORT":"5432",
+        "NAME": os.getenv("DB_NAME", "tienda"),
+        "USER": os.getenv("DB_USER", "postgres"),
+        "PASSWORD": os.getenv("DB_PASSWORD", "1593"),
+        "HOST": os.getenv("DB_HOST", "db"),
+        "PORT": os.getenv("DB_PORT", "5432"),
     }
 }
 

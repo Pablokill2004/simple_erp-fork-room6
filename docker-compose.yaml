@@ -1,0 +1,84 @@
+# ============================================================
+# docker-compose.yml — simple_erp stack completo
+# Levanta PostgreSQL + Django con: docker compose up
+# ============================================================
+
+# "version" define la sintaxis de docker-compose a usar.
+version: "3.9"
+
+services:
+
+  # ----------------------------------------------------------
+  # Servicio 1: Base de datos PostgreSQL
+  # "db" es el nombre interno. La app Django lo usa como host.
+  # ----------------------------------------------------------
+  db:
+    # Imagen oficial de PostgreSQL versión 15 (estable).
+    # "15-alpine" = versión Alpine Linux, más liviana (~50MB).
+    image: postgres:15-alpine
+
+    # Variables de entorno que PostgreSQL usa al inicializarse
+    # por primera vez para crear el usuario y la base de datos.
+    environment:
+      POSTGRES_DB: ${DB_NAME:-tienda}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?La variable DB_PASSWORD es obligatoria. Copia .env.example a .env}
+
+    # Volumen persistente: los datos de la DB sobreviven
+    # aunque destruyas y vuelvas a crear el contenedor.
+    # Sin esto, perderías todos los datos al hacer docker compose down.
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    # Healthcheck: docker-compose esperará a que PostgreSQL
+    # esté REALMENTE listo antes de arrancar Django.
+    # Sin esto, Django intenta conectarse antes de que la DB esté lista.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres} -d ${DB_NAME:-tienda}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ----------------------------------------------------------
+  # Servicio 2: Aplicación Django
+  # ----------------------------------------------------------
+  web:
+    # Construye la imagen usando el Dockerfile de este directorio.
+    # "." = contexto de build = carpeta actual del proyecto.
+    build: .
+
+    # Sobreescribe el CMD del Dockerfile para desarrollo:
+    # runserver recarga automáticamente cuando cambias código.
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py runserver 0.0.0.0:8000"
+
+    # Monta el código fuente local dentro del contenedor.
+    # Así, cambios en tu editor se reflejan sin reconstruir la imagen.
+    volumes:
+      - .:/app
+
+    # Mapeo de puertos: HOST:CONTENEDOR
+    # Accedes en tu navegador como: http://localhost:8000
+    ports:
+      - "8000:8000"
+
+    # Lee variables del archivo .env (que creaste desde .env.example)
+    env_file:
+      - .env
+
+    # Sobreescribe DB_HOST: dentro de docker-compose, la app
+    # debe hablarle al servicio "db", no a 127.0.0.1.
+    environment:
+      - DB_HOST=db
+
+    # "depends_on" + condition: web NO arranca hasta que db
+    # pase el healthcheck. Resuelve el race condition clásico.
+    depends_on:
+      db:
+        condition: service_healthy
+
+# Volúmenes nombrados: docker los gestiona en su propio espacio.
+# "postgres_data" persiste entre docker compose down / up.
+volumes:
+  postgres_data:

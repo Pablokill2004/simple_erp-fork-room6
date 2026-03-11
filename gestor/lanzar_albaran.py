@@ -144,7 +144,7 @@ class CrearAlbaran:
     def send_email(self):
         """ Envia el email con el excel adjunto
         """
-        sender_email = "my_email@example.com"
+        sender_email = "my_email@example.commy_email@example.com"
         receiver_email = "your_email@example.com"
         subject = "Albaran - " \
                 + str(self.cliente) \

@@ -97,6 +97,8 @@ A continuación se documentan los prompts utilizados para generar el primer borr
 
 ### ❌ Issue 1
 
+ERROR: To modify pip, please run the following command:
+C:\Users\pablo\OneDrive\Documentos\Proyectos y Labs\ISA\simple_erp-fork-room6\venv\bin\python3.exe -m pip install --upgrade pip
 ---
 
 *Documento generado como parte del Deliverable 2 — The Golden Path.*
